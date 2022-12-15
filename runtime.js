@@ -1,48 +1,20 @@
-class GuessingGame {
-  constructor(max) {
-    this.answer = Math.ceil(max * Math.random());
-    this.range = max;
-    this.lastGuess = null;
-  }
-  checkAnswer = (guess) => {
-    if (guess === this.answer) {
-      console.log("\n");
-      console.log("You win!");
-      console.log(`You correctly guessed the answer of ${guess}`);
-      console.log("\n");
-      return false;
-    }
-    if (Math.abs(this.lastGuess - this.answer) > Math.abs(guess - this.answer)) {
-      console.log("Getting warmer... ");
-    }
-    if (Math.abs(this.lastGuess - this.answer) < Math.abs(guess - this.answer)) {
-      console.log("Getting colder... ");
-    }
-    this.lastGuess = guess;
-    return true;
-  };
-  greet = () => {
-    console.log(this.answer);
-    console.log("\n");
-    console.log("Welcome to the Guessing Game.");
-    console.log(`Guess a number between 1 and ${this.range}`);
-    console.log("\n");
-  };
-  quit = () => {
-    console.log("\n");
-    console.log("Thanks for playing Guessing Game!");
-    console.log("The answer was", this.answer);
-    console.log("Goodbye");
-    console.log("\n");
-    return false;
-  }
-}
+const GuessingGame = require("./games/guessingGame.js");
+const PokeGame = require("./games/pokemon.js");
 
 const inGreen = str => "\x1b[32m" + str + "\x1b[0m";
 
 async function commandHandler(cmd, prompt) {
   const [op, arg] = cmd.split(" ");
   switch(op) {
+  case "pokemon":
+    let pokeGame = new PokeGame();
+    pokeGame.greet();
+    let pokeSub = true;
+    while (pokeSub) {
+      const cmd = await prompt.question("--> ");
+      pokeSub = pokeGame.subCommand(cmd);
+    }
+    return true;
   case "guess":
     let game = new GuessingGame(arg ? Number(arg) : 10);
     game.greet();
@@ -58,12 +30,13 @@ async function commandHandler(cmd, prompt) {
     console.log("AVAILABLE COMMANDS:");
     console.log(`${inGreen("quit")}: exit the game`);
     console.log(`${inGreen("guess <max num>")}: play Nth guessing game`);
+    console.log(`${inGreen("pokemon")}: play Pokemon tamagachi clone`);
     console.log("\n");
     return true;
   case "quit": return false;
   default:
-    console.log(cmd);
-    return cmd;
+    console.log(`Unrecognized command: ${cmd}`);
+    return true;
 }
 }
 
